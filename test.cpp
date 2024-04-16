@@ -251,14 +251,14 @@ Article article2;
 // cout<<"--------------------------------------"<<endl;
 
 // // 序列化索引并存储：作者->文章标题，文章标题->文章信息
-// saveAuthorToTitles(authorToTitles, "Q:\\dataStructures\\authorToTitles.bin");
-// saveTitleToArticle(titleToArticle, "Q:\\dataStructures\\titleToArticle.bin");
+// saveAuthorToTitles(authorToTitles, "C:\\software\\school\\homewwork\\data_structure_big\\Index_Serialize_Test\\authorToTitles.bin");
+// saveTitleToArticle(titleToArticle, "C:\\software\\school\\homewwork\\data_structure_big\\Index_Serialize_Test\\titleToArticle.bin");
 
 
 // 反序列化
-deSerialize("Q:\\Index_Serialize_Test\\authorToTitles.bin", "Q:\\Index_Serialize_Test\\titleToArticle.bin",authorToTitles, titleToArticle);
+deSerialize("C:\\software\\school\\homewwork\\data_structure_big\\Index_Serialize_Test\\authorToTitles.bin", "C:\\software\\school\\homewwork\\data_structure_big\\Index_Serialize_Test\\titleToArticle.bin",authorToTitles, titleToArticle);
 cout<< article1.element<<endl;
-// 测试搜索
+//测试搜索
 string author = "Daniel Genkin";
 searchByAuthor(author);
 cout<<"--------------------------------------"<<endl;
