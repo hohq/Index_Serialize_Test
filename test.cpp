@@ -47,7 +47,11 @@ struct Article {
     
     template <class Archive>
     void serialize(Archive& ar) {
-        ar(element, key, author, editor, title, booktitle, pages, year, address, journal, volume, number, month, url, ee, cdrom, cite, publisher, note, crossref, isbn, series, school, chapter, publnr, stream, rel);
+        ar(element, key, author, editor, title,
+         booktitle, pages, year, address, journal,
+          volume, number, month, url, ee, cdrom, cite,
+           publisher, note, crossref, isbn, series, school,
+            chapter, publnr, stream, rel);
     }
 };
 
@@ -96,6 +100,33 @@ void saveTitleToArticle(const unordered_map<string, Article>& map, const string&
 }
 
 /**
+ * 反序列化到索引中
+ * 
+ * @param path1 第一个文件的路径。这是一个字符串，表示要从中读取数据的文件的路径。
+ * 
+ * @param path2 第二个文件的路径。这是一个字符串，表示要从中读取数据的文件的路径。
+ * 
+ * @param authorToTitles 作者到文章标题的映射。这是一个unordered_map，用于存储反序列化的作者到文章标题的映射。
+ * 
+ * @param titleToArticle 文章标题到文章信息的映射。这是一个unordered_map，用于存储反序列化的文章标题到文章信息的映射。
+ * 
+ * @return 无返回值。
+ */
+void deSerialize(const string& path1,const string& path2, unordered_map<string, vector<string>>& authorToTitles, 
+            unordered_map<string, Article>& titleToArticle) {
+    if (path1.empty() || path2.empty()) {
+        throw invalid_argument("File path cannot be empty.");
+    }
+    std::ifstream file1(path1, std::ios::binary);
+    std::ifstream file2(path2, std::ios::binary);
+    cereal::BinaryInputArchive inputArchive1(file1);
+    cereal::BinaryInputArchive inputArchive2(file2);
+    // 从两个文件中分别读取数据
+    inputArchive1(authorToTitles);
+    inputArchive2(titleToArticle);
+}
+
+/**
  * 添加新的文章到索引中
  * 
  * @param article 文章信息。是一个Article对象，包含文章的所有信息，包括标题、作者、期刊、年份和EE等。
@@ -115,7 +146,7 @@ void addArticle(const Article& article) {
 
     // 添加新的文章到titleToArticle
     titleToArticle[article.title] = article;
-    // 循环                                                                                                                                                                                                                                                                                                                                                                      更新authorToTitles
+    // 循环更新authorToTitles
     for (const string& author : article.author) {
         authorToTitles[author].push_back(article.title);
     }
@@ -131,9 +162,9 @@ void addArticle(const Article& article) {
  * @throws invalid_argument 如果作者名为空。 
  * */
 void searchByAuthor(const string& author) {
-    if (author.empty())
+    if (author.empty()) {
         throw invalid_argument("Author name cannot be empty.");
-
+    }
     if (authorToTitles.find(author) != authorToTitles.end()) {
         const vector<string>& titles = authorToTitles[author];
         for (const string& title : titles) {
@@ -164,9 +195,9 @@ void searchByAuthor(const string& author) {
  * @throws invalid_argument 如果标题为空。
  * */
 void searchByTitle(const string& title) {
-    if (title.empty())
+    if (title.empty()) {
         throw invalid_argument("Title cannot be empty.");
-
+    }
     if (titleToArticle.find(title) != titleToArticle.end()) {
         const Article& article = titleToArticle[title];
         // 显示文章的信息，以后再优化
@@ -190,27 +221,43 @@ int main() {
 Article article1;
 Article article2;
 
-// 测试数据
-article1.element = "article";
-article1.key = "tr/meltdown/s18";
-article1.author = {"Paul Kocher", "Daniel Genkin", "Daniel Gruss", "Werner Haas", "Mike Hamburg",
-                     "Moritz Lipp", "Stefan Mangard", "Thomas Prescher", "Michael Schwarz"};
-article1.title = "Spectre Attacks: Exploiting Speculative Execution";
-article1.journal = "meltdownattack.com";
-article1.year = 2018;
-article1.ee = "https://meltdownattack.com/spectre.pdf";
-addArticle(article1);
+// // 测试数据
+// article1.element = "article";
+// article1.key = "tr/meltdown/s18";
+// article1.author = {"Paul Kocher", "Daniel Genkin", "Daniel Gruss", "Werner Haas", "Mike Hamburg",
+//                      "Moritz Lipp", "Stefan Mangard", "Thomas Prescher", "Michael Schwarz"};
+// article1.title = "Spectre Attacks: Exploiting Speculative Execution";
+// article1.journal = "meltdownattack.com";
+// article1.year = 2018;
+// article1.ee = "https://meltdownattack.com/spectre.pdf";
+// addArticle(article1);
 
-article2.element = "article";
-article2.key = "tr/meltdown/m18";
-article2.author = {"Moritz Lipp", "Michael Schwarz", "Daniel Gruss", "Thomas Prescher", "Werner Haas",
-                     "Stefan Mangard", "Paul Kocher", "Daniel Genkin", "Mike Hamburg"};
-article2.title = "Meltdown";
-article2.journal = "meltdownattack.com";
-article2.year = 2018;
-article2.ee = "https://meltdownattack.com/meltdown.pdf";
-addArticle(article2);
+// article2.element = "article";
+// article2.key = "tr/meltdown/m18";
+// article2.author = {"Moritz Lipp", "Michael Schwarz", "Daniel Gruss", "Thomas Prescher", "Werner Haas",
+//                      "Stefan Mangard", "Paul Kocher", "Daniel Genkin", "Mike Hamburg"};
+// article2.title = "Meltdown";
+// article2.journal = "meltdownattack.com";
+// article2.year = 2018;
+// article2.ee = "https://meltdownattack.com/meltdown.pdf";
+// addArticle(article2);
 
+// // 测试搜索
+// string author = "Daniel Genkin";
+// searchByAuthor(author);
+// cout<<"--------------------------------------"<<endl;
+// string title = "Meltdown";
+// searchByTitle(title);
+// cout<<"--------------------------------------"<<endl;
+
+// // 序列化索引并存储：作者->文章标题，文章标题->文章信息
+// saveAuthorToTitles(authorToTitles, "Q:\\dataStructures\\authorToTitles.bin");
+// saveTitleToArticle(titleToArticle, "Q:\\dataStructures\\titleToArticle.bin");
+
+
+// 反序列化
+deSerialize("Q:\\Index_Serialize_Test\\authorToTitles.bin", "Q:\\Index_Serialize_Test\\titleToArticle.bin",authorToTitles, titleToArticle);
+cout<< article1.element<<endl;
 // 测试搜索
 string author = "Daniel Genkin";
 searchByAuthor(author);
@@ -219,8 +266,5 @@ string title = "Meltdown";
 searchByTitle(title);
 cout<<"--------------------------------------"<<endl;
 
-// 序列化索引并存储：作者->文章标题，文章标题->文章信息
-saveAuthorToTitles(authorToTitles, "Q:\\dataStructures\\authorToTitles.bin");
-saveTitleToArticle(titleToArticle, "Q:\\dataStructures\\titleToArticle.bin");
 return 0;
 }

@@ -17,5 +17,5 @@ void searchByAuthor(const string& author)
 
 void searchByTitle(const string& title)
 
-
+void deSerialize(const string& path1,const string& path2, unordered_map<string, vector<string>>& authorToTitles, unordered_map<string, Article>& titleToArticle) 
 ```
